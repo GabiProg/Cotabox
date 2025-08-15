@@ -18,6 +18,27 @@ function App() {
     getParticipations();
   }, []);
 
+  const handleDelete = async (id) => {
+    const confirmDelete = window.confirm("Tem certeza que deseja excluir este participante?");
+    if (!confirmDelete) return;
+  
+    try {
+      const response = await fetch(`http://localhost:3000/participation/${id}`, {
+        method: "DELETE",
+      });
+  
+      if (response.ok) {
+        setParticipations(prev => prev.filter(p => p._id !== id));
+      } else {
+        const errorData = await response.json();
+        alert("Erro: " + errorData.message);
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Erro de conexão.");
+    }
+  };
+
   return (
     <div className="app-container">
       <div className="participation-form-header">
@@ -38,16 +59,19 @@ function App() {
                 <th>First name</th>
                 <th>Last name</th>
                 <th id="participation-table">Participation</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
               {participations.map((item, index) => (
                 <ListComponent
                   key={item.id}
+                  id={item._id}
                   index={index + 1}
                   firstName={item.firstName}
                   lastName={item.lastName}
                   participation={item.participationPorcentage}
+                  onDelete={handleDelete}
                 />
               ))}
             </tbody>
